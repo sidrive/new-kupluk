@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ikon final "Waktu Sholat" — bulan sabit + bintang (motif Islami umum, bukan
+  hasil jiplak ikon app "Kupluk" lama). Konten sengaja diletakkan di dalam
+  "safe zone" adaptive icon (lingkaran ~66dp di tengah viewport 108x108)
+  supaya tidak terpotong di launcher yang membulatkan ikon.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Bulan sabit: lingkaran besar dikurangi lingkaran offset (evenOdd) -->
+    <path
+        android:fillColor="#C9A227"
+        android:fillType="evenOdd"
+        android:pathData="M54,32 A22,22 0 1 0 54,76 A22,22 0 1 0 54,32 Z M61,35 A19,19 0 1 0 61,73 A19,19 0 1 0 61,35 Z" />
+    <!-- Bintang kecil sebagai aksen -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M79,42 L81.2,47.8 L87,50 L81.2,52.2 L79,58 L76.8,52.2 L71,50 L76.8,47.8 Z" />
+</vector>
