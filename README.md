@@ -23,11 +23,11 @@ untuk analisis fungsional app lama yang jadi referensi).
 - ✅ **Layar Pengaturan** (`ui/screens/SettingsScreen.kt`) — pilih metode perhitungan (Kemenag/MWL/ISNA/Umm al-Qura/Egyptian/Karachi), madzhab Ashar (Syafi'i/Hanafi), koreksi manual per waktu (menit), dan toggle lokasi GPS otomatis vs manual (input latitude/longitude)
 - ✅ **Reschedule harian otomatis** — `work/DailyRescheduleWorker.kt`, chained one-time `WorkManager` request yang reschedule alarm ~5 menit setelah tengah malam tiap hari, di-enqueue dari `WaktuSholatApp.onCreate()` dan `BootCompletedReceiver`
 - ✅ **Ikon app baru** — adaptive icon custom (bulan sabit + bintang, palet hijau/emas sesuai `ui/theme/Color.kt`) plus varian monokrom untuk themed icon Android 13+
+- ✅ **Audio adzan asli** — `res/raw/adzan.ogg`, rekaman "Beautiful adhan.ogg" dari Wikimedia Commons, didedikasikan ke public domain (CC0 1.0), bukan file dari APK "Kupluk" lama
 
 ## Yang BELUM ada / butuh tindakan manual
-1. **File audio adzan asli** — `res/raw/adzan.mp3` masih placeholder teks (agent tidak bisa menyediakan file audio berlisensi bebas). **Wajib** diganti dengan file mp3 asli sebelum build/run — cari sumber open-license atau rekam sendiri, JANGAN pakai file dari APK "Kupluk" lama.
-2. Fitur tambahan sesuai blueprint (`KUPLUK_REBUILD_BLUEPRINT.md`): Qur'an reader, tasbih digital, kalender Hijriah, bookmark ayat, Qibla compass UI — belum dikerjakan, bisa dibangun modul per modul setelah core (jadwal + alarm + pengaturan) stabil.
-3. Belum ada test otomatis (unit/instrumented) untuk `PrayerTimesRepository`, `PrayerSettingsRepository`, atau `AlarmScheduler`.
+1. Fitur tambahan sesuai blueprint (`KUPLUK_REBUILD_BLUEPRINT.md`): Qur'an reader, tasbih digital, kalender Hijriah, bookmark ayat, Qibla compass UI — belum dikerjakan, bisa dibangun modul per modul setelah core (jadwal + alarm + pengaturan) stabil.
+2. Belum ada test otomatis (unit/instrumented) untuk `PrayerTimesRepository`, `PrayerSettingsRepository`, atau `AlarmScheduler`.
 
 ## Catatan soal `CalculationMethodOption.KEMENAG`
 Library `adhan` tidak punya preset resmi "Kemenag RI" (sudut 20°/18°). Sementara

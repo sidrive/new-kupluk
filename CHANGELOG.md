@@ -2,6 +2,24 @@
 
 Format mengikuti [Keep a Changelog](https://keepachangelog.com). Entri terbaru di atas.
 
+## [Unreleased] — 2026-07-25 (branch `claude/checkout-new-kupluk-repo-qzymx4`)
+
+### Added
+- `res/raw/adzan.ogg` — mengganti placeholder teks dengan rekaman adzan asli: "Beautiful adhan.ogg" dari Wikimedia Commons, didedikasikan ke public domain (CC0 1.0 Universal), bukan file dari APK "Kupluk" lama. Resource tetap diakses lewat `R.raw.adzan` (nama resource Android tidak bergantung ekstensi file).
+
+### Changed
+- `service/AdzanPlayerService.kt` — komentar TODO soal audio placeholder dihapus, diganti keterangan sumber & lisensi file yang sudah terpasang.
+- `README.md` / bagian "Yang BELUM ada" — item audio adzan asli dipindah ke "Yang SUDAH ada" karena sudah terpasang.
+
+### Fixed
+Ditemukan & diperbaiki lewat build `./gradlew assembleDebug` sungguhan (Android SDK cmdline-tools + platform-35 + build-tools 35 diinstal di sandbox, bukan cuma review manual):
+- `data/PrayerTimesRepository.kt` — import `com.batoulapps.adhan.DateComponents` salah paket; class ini sebenarnya ada di `com.batoulapps.adhan.data.DateComponents`.
+- `MainActivity.kt` — nama fungsi composable root `WaktuSholatApp()` bentrok dengan class `WaktuSholatApp` (Application) di file lain dalam package yang sama ("Conflicting overloads"). Di-rename jadi `WaktuSholatRoot()`.
+- `MainActivity.kt` & `ui/screens/SettingsScreen.kt` — import eksplisit `androidx.compose.foundation.layout.weight` salah resolve ke property internal (`RowColumnParentData.weight`), bukan extension function `RowScope`/`ColumnScope.weight()` publik yang dimaksud. Import tersebut dihapus; `Modifier.weight()` tetap resolve otomatis lewat implicit scope receiver Row/Column.
+- Ditambahkan `.gitignore` (build/, .gradle/, local.properties) — sebelumnya belum ada sehingga folder `app/build/` berisiko ter-commit.
+
+Hasil: `gradle assembleDebug` sukses menghasilkan `app-debug.apk` yang bisa diinstal & dijalankan.
+
 ## [Unreleased] — 2026-07-24 (branch `claude/checkout-new-kupluk-repo-qzymx4`)
 
 ### Added

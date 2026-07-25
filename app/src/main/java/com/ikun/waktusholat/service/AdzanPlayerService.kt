@@ -30,9 +30,8 @@ class AdzanPlayerService : Service() {
     }
 
     private fun playAdzan() {
-        // NOTE: taruh file suara adzan bebas-lisensi di res/raw/adzan.mp3
-        // (JANGAN pakai file adzan.mp3 dari APK lama — cari sumber baru,
-        // banyak yang free-to-use, atau rekam sendiri).
+        // res/raw/adzan.ogg — "Beautiful adhan.ogg" dari Wikimedia Commons,
+        // didedikasikan ke public domain (CC0), bukan file dari APK Kupluk lama.
         mediaPlayer = MediaPlayer.create(this, R.raw.adzan)?.apply {
             setAudioAttributes(
                 AudioAttributes.Builder()
