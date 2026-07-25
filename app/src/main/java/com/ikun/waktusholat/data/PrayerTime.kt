@@ -37,3 +37,12 @@ enum class MadhabOption {
     SYAFII, // bayangan 1x — dipakai mayoritas Indonesia
     HANAFI, // bayangan 2x
 }
+
+/**
+ * Pilihan suara adzan: [soundId] salah satu id di [AdzanSoundCatalog.builtIn],
+ * atau [AdzanSoundCatalog.CUSTOM_ID] kalau user pilih file sendiri (di [customUri]).
+ */
+data class AdzanSoundSetting(
+    val soundId: String = AdzanSoundCatalog.defaultId,
+    val customUri: String? = null,
+)

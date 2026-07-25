@@ -6,17 +6,25 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com). Entri terbaru d
 
 ### Added
 - `res/raw/adzan.ogg` — mengganti placeholder teks dengan rekaman adzan asli: "Beautiful adhan.ogg" dari Wikimedia Commons, didedikasikan ke public domain (CC0 1.0 Universal), bukan file dari APK "Kupluk" lama. Resource tetap diakses lewat `R.raw.adzan` (nama resource Android tidak bergantung ekstensi file).
+- **Pilih & coba suara adzan** — beda dari app lama yang suara adzannya hardcode dan tidak bisa diganti/dicoba sebelum waktu adzan tiba:
+  - `res/raw/adzan_sabah_fakhry.mp3` ("Call to prayer by Sabah Fakhry", public domain PD-1923) dan `res/raw/adzan_al_azzan.ogg` ("Oración Al-Azzan", public domain) — 2 pilihan suara bawaan tambahan dari Wikimedia Commons, jadi total 3 pilihan bawaan.
+  - `data/AdzanSoundCatalog.kt` — daftar suara bawaan (id, label, resource).
+  - `data/PrayerTime.kt` — `AdzanSoundSetting(soundId, customUri)`.
+  - `data/PrayerSettingsRepository.kt` — key DataStore baru `adzan_sound_id` / `adzan_sound_custom_uri`, flow `adzanSound`, `currentAdzanSound()`, `saveAdzanSound(id)`, `saveCustomAdzanSound(uri)`.
+  - `ui/screens/SettingsScreen.kt` — section "Suara Adzan": radio button per pilihan bawaan + tombol "Dengarkan"/"Hentikan" untuk preview instan (pakai `MediaPlayer` biasa, bukan foreground service), plus opsi "File sendiri" lewat `ActivityResultContracts.OpenDocument()` (SAF, mime `audio/*`) dengan `takePersistableUriPermission` supaya tetap terbaca setelah app di-restart.
+  - `MainActivity.kt` — mengalirkan `adzanSound` dari repository ke `SettingsScreen` dan menyambungkan callback pilih suara bawaan/custom.
 
 ### Changed
-- `service/AdzanPlayerService.kt` — komentar TODO soal audio placeholder dihapus, diganti keterangan sumber & lisensi file yang sudah terpasang.
+- `service/AdzanPlayerService.kt` — komentar TODO soal audio placeholder dihapus, diganti keterangan sumber & lisensi file yang sudah terpasang; sekarang membaca pilihan suara tersimpan (`PrayerSettingsRepository.currentAdzanSound()`) alih-alih selalu memutar `R.raw.adzan`. Kalau file custom sudah tak bisa diakses (dihapus/izin dicabut), fallback otomatis ke suara bawaan default supaya adzan tetap bunyi.
 - `README.md` / bagian "Yang BELUM ada" — item audio adzan asli dipindah ke "Yang SUDAH ada" karena sudah terpasang.
 
 ### Fixed
-Ditemukan & diperbaiki lewat build `./gradlew assembleDebug` sungguhan (Android SDK cmdline-tools + platform-35 + build-tools 35 diinstal di sandbox, bukan cuma review manual):
+Ditemukan & diperbaiki lewat build `gradle assembleDebug` sungguhan (Android SDK cmdline-tools + platform-35 + build-tools 35 diinstal di sandbox, bukan cuma review manual):
 - `data/PrayerTimesRepository.kt` — import `com.batoulapps.adhan.DateComponents` salah paket; class ini sebenarnya ada di `com.batoulapps.adhan.data.DateComponents`.
 - `MainActivity.kt` — nama fungsi composable root `WaktuSholatApp()` bentrok dengan class `WaktuSholatApp` (Application) di file lain dalam package yang sama ("Conflicting overloads"). Di-rename jadi `WaktuSholatRoot()`.
 - `MainActivity.kt` & `ui/screens/SettingsScreen.kt` — import eksplisit `androidx.compose.foundation.layout.weight` salah resolve ke property internal (`RowColumnParentData.weight`), bukan extension function `RowScope`/`ColumnScope.weight()` publik yang dimaksud. Import tersebut dihapus; `Modifier.weight()` tetap resolve otomatis lewat implicit scope receiver Row/Column.
 - Ditambahkan `.gitignore` (build/, .gradle/, local.properties) — sebelumnya belum ada sehingga folder `app/build/` berisiko ter-commit.
+- `ui/screens/SettingsScreen.kt` — ikon "Stop" untuk preview tidak tersedia di dependency `material-icons-core` (hanya set ikon terbatas); dipakai `Icons.Filled.Close` sebagai gantinya.
 
 Hasil: `gradle assembleDebug` sukses menghasilkan `app-debug.apk` yang bisa diinstal & dijalankan.
 

@@ -4,9 +4,17 @@ import android.app.Service
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.IBinder
 import com.ikun.waktusholat.R
+import com.ikun.waktusholat.data.AdzanSoundCatalog
+import com.ikun.waktusholat.data.AdzanSoundSetting
+import com.ikun.waktusholat.data.PrayerSettingsRepository
 import com.ikun.waktusholat.notification.NotificationHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /**
  * Pengganti AlarmService.java (yang lama namanya membingungkan — sebenarnya
@@ -18,6 +26,8 @@ import com.ikun.waktusholat.notification.NotificationHelper
 class AdzanPlayerService : Service() {
 
     private var mediaPlayer: MediaPlayer? = null
+    private val serviceJob = SupervisorJob()
+    private val serviceScope = CoroutineScope(serviceJob)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val prayerLabel = intent?.getStringExtra(EXTRA_PRAYER_LABEL) ?: "Waktu Shalat"
@@ -25,14 +35,25 @@ class AdzanPlayerService : Service() {
         val notification = NotificationHelper(this).buildAdzanNotification(prayerLabel)
         startForeground(NotificationHelper.NOTIFICATION_ID_ADZAN, notification)
 
-        playAdzan()
+        serviceScope.launch {
+            val sound = PrayerSettingsRepository(this@AdzanPlayerService).currentAdzanSound()
+            playAdzan(sound)
+        }
         return START_NOT_STICKY
     }
 
-    private fun playAdzan() {
-        // res/raw/adzan.ogg — "Beautiful adhan.ogg" dari Wikimedia Commons,
-        // didedikasikan ke public domain (CC0), bukan file dari APK Kupluk lama.
-        mediaPlayer = MediaPlayer.create(this, R.raw.adzan)?.apply {
+    private fun playAdzan(sound: AdzanSoundSetting) {
+        // res/raw/adzan*.{ogg,mp3} — semua rekaman CC0/domain publik dari
+        // Wikimedia Commons (lihat AdzanSoundCatalog), bukan file dari APK
+        // "Kupluk" lama. User juga bisa pilih file sendiri lewat Pengaturan.
+        val player = if (sound.soundId == AdzanSoundCatalog.CUSTOM_ID && sound.customUri != null) {
+            runCatching { MediaPlayer.create(this, Uri.parse(sound.customUri)) }.getOrNull()
+                ?: MediaPlayer.create(this, R.raw.adzan) // file custom sudah tak terbaca -> fallback bawaan
+        } else {
+            MediaPlayer.create(this, AdzanSoundCatalog.rawResIdFor(sound.soundId))
+        }
+
+        mediaPlayer = player?.apply {
             setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ALARM)
@@ -47,6 +68,7 @@ class AdzanPlayerService : Service() {
     override fun onDestroy() {
         mediaPlayer?.release()
         mediaPlayer = null
+        serviceJob.cancel()
         super.onDestroy()
     }
 

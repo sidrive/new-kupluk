@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ikun.waktusholat.alarm.AlarmScheduler
+import com.ikun.waktusholat.data.AdzanSoundSetting
 import com.ikun.waktusholat.data.LocationMode
 import com.ikun.waktusholat.data.PrayerSettings
 import com.ikun.waktusholat.data.PrayerSettingsRepository
@@ -94,6 +95,7 @@ fun WaktuSholatRoot() {
         longitude = PrayerSettingsRepository.DEFAULT_LONGITUDE,
     ))
     val locationMode by repository.locationMode.collectAsState(initial = LocationMode.AUTO)
+    val adzanSound by repository.adzanSound.collectAsState(initial = AdzanSoundSetting())
 
     when (screen) {
         Screen.Dashboard -> PrayerScheduleScreen(
@@ -103,12 +105,15 @@ fun WaktuSholatRoot() {
         Screen.Settings -> SettingsScreen(
             settings = settings,
             locationMode = locationMode,
+            adzanSound = adzanSound,
             onBack = { screen = Screen.Dashboard },
             onCalculationMethodChange = { method -> scope.launch { repository.saveCalculationMethod(method) } },
             onMadhabChange = { madhab -> scope.launch { repository.saveMadhab(madhab) } },
             onCorrectionChange = { id, minutes -> scope.launch { repository.saveCorrection(id, minutes) } },
             onUseAutoLocation = { scope.launch { repository.useAutoLocation() } },
             onSetManualLocation = { lat, lon -> scope.launch { repository.setManualLocation(lat, lon) } },
+            onSelectBuiltInSound = { id -> scope.launch { repository.saveAdzanSound(id) } },
+            onSelectCustomSound = { uri -> scope.launch { repository.saveCustomAdzanSound(uri.toString()) } },
         )
     }
 }

@@ -24,6 +24,13 @@ untuk analisis fungsional app lama yang jadi referensi).
 - ✅ **Reschedule harian otomatis** — `work/DailyRescheduleWorker.kt`, chained one-time `WorkManager` request yang reschedule alarm ~5 menit setelah tengah malam tiap hari, di-enqueue dari `WaktuSholatApp.onCreate()` dan `BootCompletedReceiver`
 - ✅ **Ikon app baru** — adaptive icon custom (bulan sabit + bintang, palet hijau/emas sesuai `ui/theme/Color.kt`) plus varian monokrom untuk themed icon Android 13+
 - ✅ **Audio adzan asli** — `res/raw/adzan.ogg`, rekaman "Beautiful adhan.ogg" dari Wikimedia Commons, didedikasikan ke public domain (CC0 1.0), bukan file dari APK "Kupluk" lama
+- ✅ **Pilih & coba suara adzan** — beda dari app lama (suara adzan hardcode, tidak bisa diganti/dicoba). Sekarang di layar Pengaturan ada 3 pilihan suara bawaan (semua CC0/domain publik, lihat `data/AdzanSoundCatalog.kt`), opsi pakai file sendiri lewat Storage Access Framework, dan tombol "Dengarkan" per opsi untuk preview langsung sebelum disimpan — tidak perlu menunggu waktu adzan tiba
+
+## Suara Adzan
+- Pilihan bawaan (`AdzanSoundCatalog.builtIn`): "Beautiful adhan" (CC0), "Sabah Fakhry" (domain publik), "Al-Azzan" (domain publik, singkat) — semua diunduh dari Wikimedia Commons, bebas dipakai tanpa syarat atribusi.
+- User bisa pilih file audio sendiri (`ACTION_OPEN_DOCUMENT`, mime `audio/*`); URI-nya disimpan permanen (`takePersistableUriPermission`) lewat `PrayerSettingsRepository.saveCustomAdzanSound()`.
+- Preview di `SettingsScreen` memutar file lewat `MediaPlayer` biasa (bukan foreground service) — cukup untuk didengarkan sambil app di foreground, dengan tombol untuk menghentikan.
+- `AdzanPlayerService` membaca pilihan tersimpan (`PrayerSettingsRepository.currentAdzanSound()`) saat adzan sungguhan diputar; kalau file custom sudah tidak bisa diakses (mis. dihapus / izin dicabut), otomatis fallback ke suara bawaan default.
 
 ## Yang BELUM ada / butuh tindakan manual
 1. Fitur tambahan sesuai blueprint (`KUPLUK_REBUILD_BLUEPRINT.md`): Qur'an reader, tasbih digital, kalender Hijriah, bookmark ayat, Qibla compass UI — belum dikerjakan, bisa dibangun modul per modul setelah core (jadwal + alarm + pengaturan) stabil.
@@ -44,9 +51,10 @@ app/src/main/java/com/ikun/waktusholat/
 ├── MainActivity.kt                    # entry point + navigasi Dashboard <-> Settings (Compose)
 ├── WaktuSholatApp.kt                  # Application class, enqueue DailyRescheduleWorker
 ├── data/
-│   ├── PrayerTime.kt                  # model data (PrayerTime, PrayerSettings, enum opsi)
+│   ├── PrayerTime.kt                  # model data (PrayerTime, PrayerSettings, AdzanSoundSetting, enum opsi)
 │   ├── PrayerTimesRepository.kt       # kalkulasi waktu shalat & kiblat (adhan)
-│   └── PrayerSettingsRepository.kt    # DataStore: lokasi, mode lokasi, metode, madzhab, koreksi
+│   ├── PrayerSettingsRepository.kt    # DataStore: lokasi, mode lokasi, metode, madzhab, koreksi, suara adzan
+│   └── AdzanSoundCatalog.kt           # daftar suara adzan bawaan (CC0/domain publik)
 ├── location/
 │   └── LocationProvider.kt            # wrapper FusedLocationProviderClient
 ├── permission/

@@ -28,6 +28,8 @@ class PrayerSettingsRepository(private val context: Context) {
         val LOCATION_MODE = stringPreferencesKey("location_mode") // "AUTO" atau "MANUAL"
         val CALCULATION_METHOD = stringPreferencesKey("calculation_method")
         val MADHAB = stringPreferencesKey("madhab")
+        val ADZAN_SOUND_ID = stringPreferencesKey("adzan_sound_id")
+        val ADZAN_SOUND_CUSTOM_URI = stringPreferencesKey("adzan_sound_custom_uri")
         fun correction(id: PrayerId) = intPreferencesKey("correction_${id.name}")
     }
 
@@ -41,7 +43,33 @@ class PrayerSettingsRepository(private val context: Context) {
 
     val cityName: Flow<String?> = context.dataStore.data.map { prefs -> prefs[Keys.CITY_NAME] }
 
+    /** [AdzanSoundCatalog.builtIn] id, atau [AdzanSoundCatalog.CUSTOM_ID] kalau user pakai file sendiri. */
+    val adzanSound: Flow<AdzanSoundSetting> = context.dataStore.data.map { prefs ->
+        AdzanSoundSetting(
+            soundId = prefs[Keys.ADZAN_SOUND_ID] ?: AdzanSoundCatalog.defaultId,
+            customUri = prefs[Keys.ADZAN_SOUND_CUSTOM_URI],
+        )
+    }
+
     suspend fun currentSettings(): PrayerSettings = context.dataStore.data.first().toSettings()
+
+    suspend fun currentAdzanSound(): AdzanSoundSetting = adzanSound.first()
+
+    /** Pilih salah satu suara bawaan dari [AdzanSoundCatalog.builtIn]. */
+    suspend fun saveAdzanSound(soundId: String) {
+        context.dataStore.edit { prefs -> prefs[Keys.ADZAN_SOUND_ID] = soundId }
+    }
+
+    /**
+     * Pilih file suara sendiri. [uri] harus sudah diberi
+     * `takePersistableUriPermission` supaya tetap bisa dibaca setelah app di-restart.
+     */
+    suspend fun saveCustomAdzanSound(uri: String) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.ADZAN_SOUND_ID] = AdzanSoundCatalog.CUSTOM_ID
+            prefs[Keys.ADZAN_SOUND_CUSTOM_URI] = uri
+        }
+    }
 
     suspend fun saveLocation(latitude: Double, longitude: Double, elevation: Double = 0.0, cityName: String? = null) {
         context.dataStore.edit { prefs ->
